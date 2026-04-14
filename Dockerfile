@@ -6,4 +6,7 @@ COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
+# 🔥 ADD THIS LINE
+RUN python train.py
+
 CMD ["python", "app.py"]
