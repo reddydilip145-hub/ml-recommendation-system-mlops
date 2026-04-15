@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import pickle
 import os
 
@@ -34,14 +34,24 @@ model = RandomForestClassifier(
 
 model.fit(X_train, y_train)
 
-# Evaluate
+# Predictions
 y_pred = model.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
+y_proba = model.predict_proba(X_test)[:, 1]  # 🔥 Probability
 
-print("Model Accuracy:", accuracy)
+# Evaluation
+print("📊 Accuracy:", accuracy_score(y_test, y_pred))
+
+print("\n📊 Classification Report:")
+print(classification_report(y_test, y_pred))
+
+print("\n📊 Confusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+print("\n📊 Sample Fraud Probabilities (first 10):")
+print(y_proba[:10])
 
 # Save model
 with open("artifacts/model.pkl", "wb") as f:
     pickle.dump(model, f)
 
-print("Model saved successfully!")
+print("✅ Model saved successfully!")
