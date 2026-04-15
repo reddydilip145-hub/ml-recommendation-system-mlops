@@ -1,53 +1,47 @@
 from flask import Flask, request, jsonify
 import pickle
+import numpy as np
+
+print("🔥 NEW APP VERSION RUNNING 🔥")
 
 app = Flask(__name__)
 
 # Load model
-try:
-    with open("artifacts/model.pkl", "rb") as f:
-        model = pickle.load(f)
-except Exception as e:
-    print("Error loading model:", e)
-    model = None
+with open("artifacts/model.pkl", "rb") as f:
+    model = pickle.load(f)
 
-@app.route('/')
+@app.route("/")
 def home():
-    return "Fraud Detection Model Running 🚀"
+    return "Fraud Detection API Running 🚀"
 
-@app.route('/health')
-def health():
-    return jsonify({"status": "OK"}), 200
-
-@app.route('/predict', methods=['POST'])
+@app.route("/predict", methods=["POST"])
 def predict():
     try:
-        if model is None:
-            return jsonify({"error": "Model not loaded"}), 500
-
         data = request.get_json()
+        print("Incoming data:", data)
 
         # Validate input
-        if not data or 'age' not in data or 'salary' not in data:
-            return jsonify({
-                "error": "Invalid input. Required fields: age, salary"
-            }), 400
+        if not data or "features" not in data:
+            return jsonify({"error": "Invalid input. Required field: features"}), 400
 
-        age = data['age']
-        salary = data['salary']
+        features = data["features"]
 
-        features = [[age, salary]]
+        # Validate length
+        if len(features) != 29:
+           return jsonify({"error": "Exactly 29 features required"}), 400
 
-        prediction = model.predict(features)
+        input_data = np.array(features).reshape(1, -1)
 
-        return jsonify({
-            "input": {"age": age, "salary": salary},
-            "prediction": int(prediction[0])
-        })
+        prediction = model.predict(input_data)[0]
+
+        result = "Fraud" if prediction == 1 else "Not Fraud"
+
+        return jsonify({"prediction": result})
 
     except Exception as e:
+        print("Error:", str(e))
         return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host="0.0.0.0", port=5000)	
