@@ -1,53 +1,40 @@
 from flask import Flask, request, jsonify
 import pickle
+import numpy as np
 
 app = Flask(__name__)
 
 # Load model
-try:
-    with open("artifacts/model.pkl", "rb") as f:
-        model = pickle.load(f)
-except Exception as e:
-    print("Error loading model:", e)
-    model = None
+with open("artifacts/model.pkl", "rb") as f:
+    model = pickle.load(f)
 
-@app.route('/')
+@app.route("/")
 def home():
-    return "Fraud Detection Model Running 🚀"
+    return "Fraud Detection API Running 🚀"
 
-@app.route('/health')
-def health():
-    return jsonify({"status": "OK"}), 200
-
-@app.route('/predict', methods=['POST'])
+@app.route("/predict", methods=["POST"])
 def predict():
     try:
-        if model is None:
-            return jsonify({"error": "Model not loaded"}), 500
-
         data = request.get_json()
 
-        # Validate input
-        if not data or 'age' not in data or 'salary' not in data:
-            return jsonify({
-                "error": "Invalid input. Required fields: age, salary"
-            }), 400
+        # Expecting 30 features
+        features = data["features"]
 
-        age = data['age']
-        salary = data['salary']
+        # Convert to numpy array
+        input_data = np.array(features).reshape(1, -1)
 
-        features = [[age, salary]]
+        prediction = model.predict(input_data)[0]
 
-        prediction = model.predict(features)
+        result = "Fraud" if prediction == 1 else "Not Fraud"
 
         return jsonify({
-            "input": {"age": age, "salary": salary},
-            "prediction": int(prediction[0])
+            "prediction": result
         })
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
+        return jsonify({
+            "error": str(e)
+        })
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host="0.0.0.0", port=5000)
