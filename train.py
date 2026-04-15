@@ -1,27 +1,47 @@
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 import pickle
 import os
+
+print("🚀 New training started...")
 
 # Create artifacts folder
 os.makedirs("artifacts", exist_ok=True)
 
-# Sample dataset
-data = {
-    "age": [25, 35, 45, 50],
-    "salary": [20000, 40000, 60000, 80000],
-    "purchased": [0, 0, 1, 1]
-}
+# Load dataset
+data = pd.read_csv("data/creditcard.csv")
 
-df = pd.DataFrame(data)
+# Drop unnecessary column
+data = data.drop("Time", axis=1)
 
-X = df[["age", "salary"]]
-y = df["purchased"]
+# Features and target
+X = data.drop("Class", axis=1)
+y = data["Class"]
 
-model = LogisticRegression()
-model.fit(X, y)
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
 
+# Train model
+model = RandomForestClassifier(
+    n_estimators=100,
+    class_weight="balanced",
+    random_state=42
+)
+
+model.fit(X_train, y_train)
+
+# Evaluate
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+
+print("Model Accuracy:", accuracy)
+
+# Save model
 with open("artifacts/model.pkl", "wb") as f:
     pickle.dump(model, f)
 
-print("Model trained and saved")
+print("Model saved successfully!")
