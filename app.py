@@ -6,7 +6,6 @@ print("🔥 NEW APP VERSION RUNNING 🔥")
 
 app = Flask(__name__)
 
-# Load model
 with open("artifacts/model.pkl", "rb") as f:
     model = pickle.load(f)
 
@@ -20,15 +19,13 @@ def predict():
         data = request.get_json()
         print("Incoming data:", data)
 
-        # Validate input
         if not data or "features" not in data:
             return jsonify({"error": "Invalid input. Required field: features"}), 400
 
         features = data["features"]
 
-        # Validate length
         if len(features) != 29:
-           return jsonify({"error": "Exactly 29 features required"}), 400
+            return jsonify({"error": "Exactly 29 features required"}), 400
 
         input_data = np.array(features).reshape(1, -1)
 
@@ -44,4 +41,4 @@ def predict():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)	
+    app.run(host="0.0.0.0", port=5000)
