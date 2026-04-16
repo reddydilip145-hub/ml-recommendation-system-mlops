@@ -4,15 +4,19 @@ metadata:
   name: fraud-api
   labels:
     app: fraud-api
+
 spec:
   replicas: 2
+
   selector:
     matchLabels:
       app: fraud-api
+
   template:
     metadata:
       labels:
         app: fraud-api
+
     spec:
       containers:
         - name: fraud-api
@@ -20,20 +24,18 @@ spec:
           ports:
             - containerPort: 5000
 
-          # 🔥 LIVENESS PROBE (is app alive?)
+          # 🔥 LIVENESS PROBE
           livenessProbe:
             httpGet:
               path: /health
               port: 5000
             initialDelaySeconds: 15
             periodSeconds: 10
-            failureThreshold: 3
 
-          # 🔥 READINESS PROBE (is app ready?)
+          # 🔥 READINESS PROBE
           readinessProbe:
             httpGet:
               path: /health
               port: 5000
             initialDelaySeconds: 5
             periodSeconds: 5
-            failureThreshold: 3
