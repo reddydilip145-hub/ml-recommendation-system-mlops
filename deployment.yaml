@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fraud-api
+  labels:
+    app: fraud-api
 spec:
   replicas: 2
   selector:
@@ -13,7 +15,25 @@ spec:
         app: fraud-api
     spec:
       containers:
-      - name: fraud-api
-        image: karthikeyajeshwanth/fraud-detection-model:latest
-        ports:
-        - containerPort: 5000
+        - name: fraud-api
+          image: karthikeyajeshwanth/fraud-detection-model:latest
+          ports:
+            - containerPort: 5000
+
+          # 🔥 LIVENESS PROBE (is app alive?)
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+
+          # 🔥 READINESS PROBE (is app ready?)
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
