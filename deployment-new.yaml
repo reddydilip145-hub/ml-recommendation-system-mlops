@@ -21,23 +21,32 @@ spec:
       containers:
         - name: fraud-api
           image: karthikeyajeshwanth/fraud-detection-model:latest
+
           ports:
             - containerPort: 5000
 
-          # 🔥 LIVENESS PROBE
+          # 🔥 LIVENESS PROBE (container health)
           livenessProbe:
             httpGet:
               path: /health
               port: 5000
-            initialDelaySeconds: 15
+            initialDelaySeconds: 40
             periodSeconds: 10
             failureThreshold: 3
 
-          # 🔥 READINESS PROBE
+          # 🔥 READINESS PROBE (traffic control)
           readinessProbe:
             httpGet:
               path: /health
               port: 5000
-            initialDelaySeconds: 5
+            initialDelaySeconds: 30
             periodSeconds: 5
             failureThreshold: 3
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
