@@ -1,13 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: fraud-service
+  name: fraud-api-service
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: fraud-api
   ports:
     - protocol: TCP
       port: 80
       targetPort: 5000
-      nodePort: 30007
