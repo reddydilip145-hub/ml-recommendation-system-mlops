@@ -21,6 +21,7 @@ spec:
       containers:
         - name: fraud-api
           image: karthikeyajeshwanth/fraud-detection-model:latest
+          imagePullPolicy: Always
 
           ports:
             - containerPort: 5000
