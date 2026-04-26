@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fraud-api-v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fraud-api
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: fraud-api
+        version: v1
+    spec:
+      containers:
+        - name: fraud-api
+          image: karthikeyajeshwanth/fraud-detection-model:latest
+          ports:
+            - containerPort: 5000
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 40
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 30

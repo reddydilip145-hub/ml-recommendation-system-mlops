@@ -1,57 +1,65 @@
-import pandas as pd
+import mlflow
+import mlflow.sklearn
+from mlflow.tracking import MlflowClient
+
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-import pickle
-import os
 
-print("🚀 New training started...")
+# Create dummy dataset
+X, y = make_classification(n_samples=1000, n_features=20, random_state=42)
 
-# Create artifacts folder
-os.makedirs("artifacts", exist_ok=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-# Load dataset
-data = pd.read_csv("data/creditcard.csv")
+models = {
+    "RandomForest": RandomForestClassifier(n_estimators=100),
+    "LogisticRegression": LogisticRegression()
+}
 
-# Drop unnecessary column
-data = data.drop("Time", axis=1)
+mlflow.set_experiment("fraud-detection")
 
-# Features and target
-X = data.drop("Class", axis=1)
-y = data["Class"]
+best_accuracy = 0
+best_run_id = None
 
-# Split data
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, stratify=y, random_state=42
+for model_name, model in models.items():
+    with mlflow.start_run(run_name=model_name) as run:
+
+        model.fit(X_train, y_train)
+        accuracy = model.score(X_test, y_test)
+
+        # Log details
+        mlflow.log_param("model_name", model_name)
+        mlflow.log_metric("accuracy", accuracy)
+
+        # Log model artifact
+        mlflow.sklearn.log_model(model, artifact_path="model")
+
+        print(f"{model_name} Accuracy: {accuracy}")
+
+        # Track best model
+        if accuracy > best_accuracy:
+            best_accuracy = accuracy
+            best_run_id = run.info.run_id
+
+# Register best model
+model_uri = f"runs:/{best_run_id}/model"
+
+registered_model = mlflow.register_model(
+    model_uri=model_uri,
+    name="BestFraudModel"
 )
 
-# Train model
-model = RandomForestClassifier(
-    n_estimators=100,
-    class_weight="balanced",
-    random_state=42
+print(f"\nBest Model Accuracy: {best_accuracy}")
+print(f"Registered Model Version: {registered_model.version}")
+
+# 🔥 OPTIONAL: Move model to Production automatically
+client = MlflowClient()
+
+client.transition_model_version_stage(
+    name="BestFraudModel",
+    version=registered_model.version,
+    stage="Production"
 )
 
-model.fit(X_train, y_train)
-
-# Predictions
-y_pred = model.predict(X_test)
-y_proba = model.predict_proba(X_test)[:, 1]  # 🔥 Probability
-
-# Evaluation
-print("📊 Accuracy:", accuracy_score(y_test, y_pred))
-
-print("\n📊 Classification Report:")
-print(classification_report(y_test, y_pred))
-
-print("\n📊 Confusion Matrix:")
-print(confusion_matrix(y_test, y_pred))
-
-print("\n📊 Sample Fraud Probabilities (first 10):")
-print(y_proba[:10])
-
-# Save model
-with open("artifacts/model.pkl", "wb") as f:
-    pickle.dump(model, f)
-
-print("✅ Model saved successfully!")
+print("Model moved to Production!")

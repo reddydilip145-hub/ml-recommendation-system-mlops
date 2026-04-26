@@ -1,0 +1,23 @@
+artifact_path: file:C:/Users/abcom/Desktop/ml-recommendation-system-mlops/mlruns/1/models/m-daf511968e9844e6a215c9cb62c9d865/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.14.4
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+mlflow_version: 3.11.1
+model_id: m-daf511968e9844e6a215c9cb62c9d865
+model_size_bytes: 1095488
+model_uuid: m-daf511968e9844e6a215c9cb62c9d865
+prompts: null
+run_id: f59a84208adf498ca999b3f3aa845371
+utc_time_created: '2026-04-16 17:39:38.841268'
