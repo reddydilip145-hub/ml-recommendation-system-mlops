@@ -6,7 +6,7 @@ metadata:
     app: fraud-api
 
 spec:
-  replicas: 2
+  replicas: 1   # 🔥 IMPORTANT (only 1 pod)
 
   selector:
     matchLabels:
@@ -21,21 +21,28 @@ spec:
       containers:
         - name: fraud-api
           image: karthikeyajeshwanth/fraud-detection-model:latest
+
           ports:
             - containerPort: 5000
 
-          # 🔥 LIVENESS PROBE
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+
           livenessProbe:
             httpGet:
               path: /health
               port: 5000
-            initialDelaySeconds: 15
+            initialDelaySeconds: 30
             periodSeconds: 10
 
-          # 🔥 READINESS PROBE
           readinessProbe:
             httpGet:
               path: /health
               port: 5000
-            initialDelaySeconds: 5
+            initialDelaySeconds: 20
             periodSeconds: 5
