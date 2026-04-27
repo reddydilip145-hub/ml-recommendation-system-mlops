@@ -1,2 +1,8 @@
 artifacts/*
 !artifacts/model.pkl
+data/
+mlruns/
+mlflow.db
+__pycache__/
+*.pyc
+*.log
